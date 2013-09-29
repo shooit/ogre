@@ -52,6 +52,10 @@
 ;; (defn step [^GremlinPipeline p e]
 ;;   (.step p e))
 
+(defn first-of! 
+  [^GremlinPipeline p]
+  (-> p (next 1) first))
+
 (defmacro ^{:private true}
   to-java-list! 
   [^GremlinPipeline p]
@@ -69,6 +73,11 @@
   [^GremlinPipeline p]
   (into '() (to-java-list! p)))
 
+(defn into-lazy-seq! 
+  [^GremlinPipeline p]
+  (let [f (fn [_] (first-of! p))]
+    (clojure.core/iterate f (f nil))))
+
 ;;Inspiried by gather, these take the first element in the object
 ;;returned and convert it to something useful for clojure.
 (defmulti convert-to-map class)
@@ -81,10 +90,6 @@
   [^Row m]
   (into {} (for [^String k (.getColumnNames m)] 
              [(keyword k) (.getColumn m k)])))
-
-(defn first-of! 
-  [^GremlinPipeline p]
-  (-> p (next 1) first))
 
 (defn first-into-vec! 
   [^GremlinPipeline p]

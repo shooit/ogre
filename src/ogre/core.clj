@@ -63,9 +63,10 @@
 (po/import-fn pipe/start)
 (po/import-fn pipe/prop)
 
+(po/import-fn pipe/first-of!)
 (po/import-fn pipe/into-vec!)
 (po/import-fn pipe/into-set!)
-(po/import-fn pipe/first-of!)
+(po/import-fn pipe/into-lazy-seq!)
 (po/import-fn pipe/first-into-vec!)
 (po/import-fn pipe/first-into-set!)
 (po/import-fn pipe/first-into-map!)
