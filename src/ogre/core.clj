@@ -56,7 +56,7 @@
 (po/import-fn pipe/back-to)
 (po/import-fn pipe/enable-path)
 (po/import-fn pipe/iterate)
-(po/import-fn pipe/next)
+(po/import-fn pipe/next!)
 (po/import-fn pipe/optimize)
 (po/import-fn pipe/optional)
 (po/import-fn pipe/optional-to)

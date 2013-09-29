@@ -5,12 +5,12 @@
   (:use ogre.util))
 
 (defn side-effect 
-  [^GremlinPipeline p ^clojure.lang.IFn f]
-  (.sideEffect p (f-to-pipef f)))
+  [p ^clojure.lang.IFn f]
+  (conj p #(.sideEffect % (f-to-pipef f))))
 
 (defn cap 
-  [^GremlinPipeline p]
-  (.cap p))
+  [p]
+  (conj p #(.cap %)))
 
 (defn convert-table 
   [^Table t]
@@ -22,12 +22,13 @@
     (map converter ts)))
 
 (defn get-table!
-  ([^GremlinPipeline p & fs] (->> (.table p (fs-to-pipef-array fs))
-                 (.cap)
-                 (.toList)
-                 seq
-                 first
-                 convert-table)))
+  ([p & fs] 
+     (->> (.table (compile-query p) (fs-to-pipef-array fs))
+          (.cap)
+          (.toList)
+          seq
+          first
+          convert-table)))
 
 ;; (defn table-into
 ;;   ([^GremlinPipeline p ^Table t] (.table p t))
@@ -56,8 +57,8 @@
       {:value name :children nexts})))
 
 (defn get-tree! 
-  [^GremlinPipeline p & fs]
-  (-> (.tree p (fs-to-pipef-array fs))
+  [p & fs]
+  (-> (.tree (compile-query p) (fs-to-pipef-array fs))
       (.cap)
       (.toList)
       seq
@@ -94,12 +95,13 @@
 
 (defn get-grouped-by!
   ([p f g] (get-grouped-by! p f g identity))
-  ([^GremlinPipeline p f g r]
-     (let [results      (-> (.groupBy p (f-to-pipef f) (f-to-pipef g))
-                            (.cap)
-                            (.toList)
-                            seq
-                            first)]
+  ([p f g r]
+     (let [results (-> (.groupBy (compile-query p) 
+                                 (f-to-pipef f) (f-to-pipef g))
+                       (.cap)
+                       (.toList)
+                       seq
+                       first)]
        (->> results
             (into {})
             (map (fn [[a b]] [a (vec b)]))
@@ -108,15 +110,18 @@
 (defn get-group-count!
   ([p] (get-group-count! p identity))
   ([p f] (get-group-count! p f (fn [a b] (inc b))))
-  ([^GremlinPipeline p ^clojure.lang.IFn f ^clojure.lang.IFn g]
-     (-> (.groupCount p (f-to-pipef f) 
-                      (f-to-pipef (fn [^Pair arg] 
-                                    (g (.getA arg) (.getB arg)))))
-         (.cap)
-         (.toList)
-         seq
-         first
-         (#(into {} %)))))
+  ([p ^clojure.lang.IFn f ^clojure.lang.IFn g]
+     (->
+      (.groupCount (compile-query p) 
+                   (f-to-pipef f) 
+                   (f-to-pipef
+                    (fn [^Pair arg] (g (.getA arg)
+                                       (.getB arg)))))
+      (.cap)
+      (.toList)
+      seq
+      first
+      ((partial into {})))))
 
 ;; GremlinPipeline<S,E>	aggregate() 
 ;; Add an AggregatePipe to the end of the Pipeline.

@@ -3,16 +3,22 @@
            (com.tinkerpop.pipes PipeFunction Pipe)
            (com.tinkerpop.gremlin Tokens$T)))
 
-(defmacro bare-pipe [& body]
-  `(-> (GremlinPipeline.)
-       ~@body))
+(defmacro bare-pipe 
+  [& body]
+  `(reduce #(%2 %1) (GremlinPipeline.) (-> [] ~@body)))
 
-(defmacro defpipe [name & body]
+(defmacro defpipe 
+  [name & body]
   `(def ~name (blank-pipe ~@body)))
 
-(defmacro query [xs & body]  
-  `(-> (GremlinPipeline. ~xs)
+(defmacro query
+  [xs & body]  
+  `(-> [~xs]
        ~@body))
+
+(defn compile-query 
+  [[xs & fs]]
+  (reduce #(%2 %1) (GremlinPipeline. xs) fs))
 
 (defmacro subquery 
   ""

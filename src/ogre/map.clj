@@ -4,44 +4,48 @@
   (:use ogre.util))
 
 (defn map
-  ([^GremlinPipeline p & keys] (.map p (keywords-to-strings keys))))
+  [p & keys] 
+  (conj p #(.map % (keywords-to-strings keys))))
 
 (defn transform 
-  [^GremlinPipeline p f]
-  (.transform p (f-to-pipef f)))
+  [p f]
+  (conj p #(.transform % (f-to-pipef f))))
 
 (defn _ 
-  [^GremlinPipeline p]
-  (._ p))
+  [p]
+  (conj p #(._ p %)))
 
 (defn id 
-  [^GremlinPipeline p] 
-  (.id p))
+  [p] 
+  (conj p #(.id %)))
 
 (defn property 
-  [^GremlinPipeline p prop]
-  (.property p (name prop)))
+  [p prop]
+  (conj p #(.property % (name prop))))
 
 (defn label 
-  [^GremlinPipeline p]
-  (.label p))
+  [p]
+  (conj p #(.label %)))
 
 (defn select
-  ([^GremlinPipeline p] (.select p))
-  ([^GremlinPipeline p & fs] (.select p (fs-to-pipef-array fs))))
+  ([p] 
+   (conj p #(.select %)))
+  ([p & fs]
+   (conj p #(.select % (fs-to-pipef-array fs)))))
 
 (defn select-only
-  ([^GremlinPipeline p cols] (select-only p cols identity))
-  ([^GremlinPipeline p ^java.util.Collection cols & fs] (.select p cols (fs-to-pipef-array fs))))
+  ([p cols] (select-only p cols identity))
+  ([p ^java.util.Collection cols & fs] 
+   (conj p #(.select % cols (fs-to-pipef-array fs)))))
 
 ;; (defn memoize
 ;;   ([is] (.memoize is))
 ;;   ([is m] (.memoize is m)))
 
 (defn scatter 
-  [^GremlinPipeline p]
-  (.scatter p))
+  [p]
+  (conj p #(.scatter %)))
 
 (defn path 
-  [^GremlinPipeline p & args]
-  (.path p (fs-to-pipef-array args)))
+  [p & args]
+  (conj p #(.path % (fs-to-pipef-array args))))

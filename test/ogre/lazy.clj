@@ -4,7 +4,7 @@
             [ogre.tinkergraph :as g]
             [ogre.test-util :as u]))
 
-(deftest test-transform-step
+(deftest test-laziness
   (g/use-new-tinker-graph!)  
   (testing "Laziness!"
     (let [state (atom [])
@@ -31,17 +31,17 @@
                                        (swap! state conj
                                               (.getProperty v "name"))))
                       (q/property :name))
-          v1 (q/query vs q/into-lazy-seq!)
-          v2 (q/query vs q/into-lazy-seq!)]
+          v1 (q/into-lazy-seq! vs)
+          v2 (q/into-lazy-seq! vs)]
       ;;The following tests show that somehow the lazy lists are
       ;;interacting. Whenever a lazy list is created from a query, it
-      ;;effects all the other queries.
-      (is (= #{"vadas" "josh"} @state))
+      ;;doesn't effect any other query (anymore)!
+      (is (= #{"vadas"} @state))
       (is (= "vadas" (first v1)))
-      (is (= #{"vadas" "josh"} @state))
-      (is (= "josh" (first v2))) 
-      (is (= #{"vadas" "josh"} @state))
+      (is (= #{"vadas"} @state))
+      (is (= "vadas" (first v2))) 
+      (is (= #{"vadas"} @state))
 
       ;;In fact, every thing derived from a half created pipe effects
       ;;every other thing derived from that same pipe. Troubling.
-      (is (= ["lop"] (.toList vs)))))) 
+      (is (= ["vadas" "josh" "lop"] (q/into-vec! vs)))))) 

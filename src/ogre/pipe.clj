@@ -1,81 +1,82 @@
 (ns ogre.pipe
-  (:refer-clojure :exclude [iterate next])
+  (:refer-clojure :exclude [iterate])
   (:import (com.tinkerpop.gremlin.java GremlinPipeline)
            (com.tinkerpop.blueprints Vertex)
            (com.tinkerpop.pipes.util.structures Row))
   (:use ogre.util))
 
 (defn add 
-  [^GremlinPipeline p e]
-  (.add p e))
+  [p e]
+  (conj p #(.add % e)))
 
 (defn as 
-  [^GremlinPipeline p ^String s]
-  (.as p s))
+  [p ^String s]
+  (conj p #(.as % s)))
 
 (defn back 
-  [^GremlinPipeline p ^Integer i]
-  (.back p i))
+  [p ^Integer i]
+  (conj p #(.back % i)))
 
 (defn back-to 
-  [^GremlinPipeline p ^String i]
-  (.back p i))
+  [p ^String i]
+  (conj p #(.back % i)))
 
 (defn enable-path 
-  [^GremlinPipeline p]
-  (.enablePath p))
+  [p]
+  (conj p #(.enablePath %)))
 
 (defn iterate 
-  [^GremlinPipeline p]
-  (.iterate p))
-
-(defn next 
-  [^GremlinPipeline p i]
-  (.next p i))
+  [p]
+  (conj p #(.iterate %)))
 
 (defn optimize 
-  [^GremlinPipeline p b]
-  (.optimize p b))
+  [p b]
+  (conj p #(.optimize % b)))
 
 (defn optional 
-  [^GremlinPipeline p ^Integer s]
-  (.optional p s))
+  [p ^Integer s]
+  (conj p #(.optional % s)))
 
 (defn optional-to 
-  [^GremlinPipeline p ^String s]
-  (.optional p s))
+  [p ^String s]
+  (conj p #(.optional % s)))
 
 (defn start 
-  [^GremlinPipeline p o]
-  (.start p o))
+  [p o]
+  (conj p #(.start % o)))
 
 ;; (defn step [^GremlinPipeline p e]
 ;;   (.step p e))
 
+(defn next! 
+  [p i]
+  (.next (compile-query p) i))
+
 (defn first-of! 
-  [^GremlinPipeline p]
-  (-> p (next 1) first))
+  [p]
+  (first (next! p 1)))
 
 (defmacro ^{:private true}
   to-java-list! 
-  [^GremlinPipeline p]
-  `(.toList ~p))
+  [p]
+  `(.toList (compile-query ~p)))
 
 (defn into-vec! 
-  [^GremlinPipeline p]
+  [p]
   (into [] (to-java-list! p)))
 
 (defn into-set! 
-  [^GremlinPipeline p]
+  [p]
   (into #{} (to-java-list! p)))
 
 (defn into-list! 
-  [^GremlinPipeline p]
+  [p]
   (into '() (to-java-list! p)))
 
 (defn into-lazy-seq! 
-  [^GremlinPipeline p]
-  (let [f (fn [_] (first-of! p))]
+  [p]
+  (let [pipeline (compile-query p)
+        f (fn [_] (first (.next pipeline 1)))]
     (clojure.core/iterate f (f nil))))
 
 ;;Inspiried by gather, these take the first element in the object
