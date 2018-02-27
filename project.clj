@@ -30,6 +30,5 @@
   :global-vars {*warn-on-reflection* true
                 *assert* false}
   :release-tasks [["vcs" "assert-committed"]
-                  ["v" "update"] ;; compute new version & tag it
                   ["vcs" "push"]
                   ["deploy" "rk-maven"]])
