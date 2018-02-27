@@ -1,4 +1,4 @@
-(defproject clojurewerkz/ogre "3.3.2.0-SNAPSHOT"
+(defproject shooit/ogre "3.3.1.1"
   :description "Clojure library for traversing Apache TinkerPop enabled graphs and a dialect of the Gremlin graph processing language"
   :url "https://github.com/clojurewerkz/ogre"
   :license {:name "Eclipse Public License"
@@ -27,4 +27,9 @@
   :plugins [[lein-junit "1.1.8"]]
   :test-paths ["test/clojure"]
   :global-vars {*warn-on-reflection* true
-                *assert* false})
+                *assert* false}
+  :release-tasks [["vcs" "assert-committed"]
+                  ["v" "update"] ;; compute new version & tag it
+                  ["vcs" "push"]
+                  ["deploy" "rk-maven"]]
+  :repositories [["rk-maven" {:url "s3p://rk-maven/releases/" :no-auth true}]])
