@@ -23,8 +23,12 @@
                              :releases {:checksum :fail :update :always}}
                  "sonatype-snapshots" {:url "https://oss.sonatype.org/content/repositories/snapshots"
                                        :snapshots true
-                                       :releases {:checksum :fail :update :always}}}
+                                       :releases {:checksum :fail :update :always}}
+                 "rk-maven" {:url "s3p://rk-maven/releases/" :no-auth true}}
   :plugins [[lein-junit "1.1.8"]]
   :test-paths ["test/clojure"]
   :global-vars {*warn-on-reflection* true
-                *assert* false})
+                *assert* false}
+  :release-tasks [["vcs" "assert-committed"]
+                  ["vcs" "push"]
+                  ["deploy" "rk-maven"]])
